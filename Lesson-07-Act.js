@@ -1,58 +1,66 @@
+// 1
 class Player {
-    constructor(name, team, score) {
+    constructor(name, team) {
         this.name = name;
-        this.score = score;
         this.team = team;
+        this.score = 0; // Fixed: Initialize score property
     }
 }
 
-function rankPlayers(players) {
-    return players.sort((a, b) => b.score - a.score);
+// 2
+let players = [
+    new Player("James", "Lakers"),
+    new Player("Curry", "Warriors"),
+    new Player("Jordan", "Bulls"),
+    new Player("Bryant", "Lakers"),
+    new Player("Durant", "Nets")
+];
+
+// 3
+function randomizer() {
+    return Math.random() > 0.5;
 }
 
-function tieBreaker(players) {
-    console.log("\n" + String.fromCodePoint(0x1F525) + " Tiebreaker needed between: " + players.map(p => p.name).join(", ")+ "\n");
-    players.forEach(player => player.score = 0);
-    
-    console.log(String.fromCodePoint(0x1F3C0) + " Round 2 Begins!");
+// 4
+function startRound(players, attempts = 5) {
     players.forEach(player => {
-        if (player.name === "James") {
-            player.score = 1;
-            console.log(`${player.name} scored 1 successful shots.`);
-        } else if (player.name === "Curry") {
-            player.score = 3;
-            console.log(`${player.name} scored 3 successful shots.`);
+        player.score = 0; 
+        for (let i = 0; i < attempts; i++) {
+            if (randomizer()) {
+                player.score++;
+            }
         }
     });
-    
-    return rankPlayers(players);
 }
 
-function playGame() {
-    let players = [
-        new Player("James", "Lakers", 3),
-        new Player("Curry", "Warriors", 3),
-        new Player("Jordan", "Bulls", 2),
-        new Player("Bryant", "Lakers", 1),
-        new Player("Durant", "Nets", 1)
-    ];
-
-    let rankedPlayers = rankPlayers(players);
-    console.log(String.fromCodePoint(0x1F3C6) + " Rankings after this round:");
-    rankedPlayers.forEach((p, index) => console.log(`${index + 1}. ${p.name} - ${p.score} points`));
-    
-    let highestScore = rankedPlayers[0].score;
-    let tiedPlayers = rankedPlayers.filter(p => p.score === highestScore);
-    
-    if (tiedPlayers.length > 1) {
-        tiedPlayers = tieBreaker(tiedPlayers);
-        highestScore = tiedPlayers[0].score;
-    }
-    
+// 5
+function rankingDisplay(players) {
+    players.sort((a, b) => b.score - a.score);
     console.log("\n" + String.fromCodePoint(0x1F3C6) + " Rankings after this round:");
-    tiedPlayers.forEach((p, index) => console.log(`${index + 1}. ${p.name} - ${p.score} points`));
-    
-    console.log(`\n${String.fromCodePoint(0x1F3C6)} The champion is ${tiedPlayers[0].name} with ${tiedPlayers[0].score} points!`);
+    players.forEach((player, index) => {
+        console.log(`${index + 1}. ${player.name} - ${player.score} points`);
+    });
 }
 
-playGame();
+//6
+function tieBreaker(players, round = 1) {
+    let highestScore = players[0].score;
+    let tiedPlayers = players.filter(player => player.score === highestScore);
+
+    if (tiedPlayers.length === 1) {
+        console.log(`\n${String.fromCodePoint(0x1F3C6)} The champion is ${tiedPlayers[0].name} with ${tiedPlayers[0].score} points!`);
+        return;
+    }
+
+    console.log(`\n${String.fromCodePoint(0x1F525)} Tie-breaker needed between: ` + tiedPlayers.map(p => p.name).join(", "));
+    console.log(`\n${String.fromCodePoint(0x1F3C0)} Round ${round} Begins!`);
+    startRound(tiedPlayers, 3, true);
+    tiedPlayers.forEach(player => console.log(`${player.name} scored ${player.score} successful shots.`));
+    rankingDisplay(tiedPlayers);
+    tieBreaker(tiedPlayers, round + 1);
+}
+
+//start
+startRound(players);
+rankingDisplay(players);
+tieBreaker(players, 2);  
